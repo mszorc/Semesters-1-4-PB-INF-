@@ -1,0 +1,118 @@
+select * from pracownik;
+select * from zlecenie;
+select * from departament;
+
+////1////
+
+select stanowisko, count(*)
+from pracownik
+group by stanowisko;
+
+////2////
+
+select to_char(data_zatrudnienia,'Month') data, count(*)
+from pracownik
+group by to_char(data_zatrudnienia,'Month')
+order by count(*);
+
+////3////
+
+select stanowisko, min(pensja), round(avg(pensja),2), max(pensja)
+from pracownik
+group by stanowisko;
+
+////4////
+
+select k.id_pracownika, count(*)
+from pracownik p, pracownik k
+where p.id_kierownika=k.id_pracownika
+group by k.id_pracownika;
+
+////5////
+
+select k.nazwisko, round(avg(p.pensja),2)
+from pracownik p, pracownik k
+where p.id_kierownika=k.id_pracownika
+group by k.nazwisko;
+
+////6////
+
+select stanowisko, count(*)
+from pracownik
+where pensja>1200
+group by stanowisko
+having count(*)>2;
+
+////7////
+
+select stanowisko,count(*), round(avg(pensja+nvl(premia,0)),2)
+from pracownik
+group by stanowisko
+having round(avg(pensja+nvl(premia,0)),2)>2000
+order by round(avg(pensja+nvl(premia,0)),2);
+
+////8a////
+
+select nr_projektu, sum(ilosc_godzin*stawka_za_godzine)
+from zlecenie
+group by nr_projektu;
+
+////8b////
+
+select nazwa, sum(ilosc_godzin*stawka_za_godzine)
+from zlecenie z, projekt pj
+where z.nr_projektu=pj.nr_projektu
+group by nazwa;
+
+////9////
+
+select nazwa, count(z.id_pracownika)
+from departament d, pracownik p, zlecenie z
+where d.nr_departamentu=p.nr_departamentu and z.id_pracownika=p.id_pracownika
+group by nazwa;
+
+////10////
+
+select pj.nazwa,count(z.id_pracownika)
+from departament d, pracownik p, zlecenie z, projekt pj
+where d.nr_departamentu=p.nr_departamentu and p.id_pracownika=z.id_pracownika
+and z.nr_projektu=pj.nr_projektu and lokalizacja='Bialystok'
+group by pj.nazwa;
+
+////11////
+
+select d.nazwa, pj.nazwa, sum(stawka_za_godzine*ilosc_godzin)
+from departament d, pracownik p, zlecenie z, projekt pj
+where d.nr_departamentu=p.nr_departamentu and p.id_pracownika=z.id_pracownika
+and z.nr_projektu=pj.nr_projektu
+group by d.nazwa, pj.nazwa;
+
+////12////
+
+select d.nazwa, pj.nazwa, sum(stawka_za_godzine*ilosc_godzin)
+from departament d, pracownik p, zlecenie z, projekt pj
+where d.nr_departamentu=p.nr_departamentu and p.id_pracownika=z.id_pracownika
+and z.nr_projektu=pj.nr_projektu and premia is null
+group by d.nazwa, pj.nazwa;
+
+////13////
+
+select stanowisko, round(avg(pensja),2), max(pensja)/2
+from pracownik 
+where id_kierownika is not null
+group by stanowisko
+having avg(pensja)>max(pensja)/2;
+
+////14////
+
+select nr_przedzialu, count(id_pracownika)
+from poziom_zarobkow, pracownik
+where pensja>=dolna_granica and pensja<=gorna_granica
+group by nr_przedzialu;
+
+////15////
+
+select nazwa, count(id_kierownika)
+from departament d, pracownik p
+where d.nr_departamentu=p.nr_departamentu(+)
+group by nazwa;

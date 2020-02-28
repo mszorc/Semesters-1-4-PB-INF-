@@ -1,0 +1,106 @@
+select * from pracownik;
+select * from zlecenie;
+
+////1////
+
+select nazwisko
+from pracownik
+where stanowisko='INFORMATYK' and pensja>any(select pensja from pracownik where stanowisko='KSIEGOWY');
+
+////2////
+
+select distinct stanowisko
+from pracownik
+where stanowisko!=all(select stanowisko from pracownik where nr_departamentu=1);
+
+////3////
+
+select stanowisko
+from pracownik 
+where stanowisko=any(select stanowisko from pracownik where nr_departamentu=1)
+group by stanowisko
+having avg(pensja)>(select avg(pensja) from pracownik);
+
+////4////
+
+select nazwisko
+from pracownik
+where id_pracownika not in (select distinct k.id_pracownika from pracownik p, pracownik k where p.id_kierownika=k.id_pracownika);
+
+////5////
+
+select id_pracownika, nazwisko, pensja+nvl(premia,0) zarobki
+from pracownik
+where id_pracownika not in (select distinct k.id_pracownika from pracownik p, pracownik k where p.id_kierownika=k.id_pracownika)
+and pensja+nvl(premia,0)=(select max(pensja+nvl(premia,0))
+from pracownik
+where id_pracownika not in (select distinct k.id_pracownika from pracownik p, pracownik k where p.id_kierownika=k.id_pracownika));
+
+////6////
+
+select nazwisko, pensja
+from pracownik
+where pensja>all(select pensja from pracownik where stanowisko='PRZEDSTAWICIEL');
+
+////7////
+
+select nazwisko
+from pracownik
+where length(nazwisko)=(select max(length(nazwisko)) from pracownik);
+
+////8////
+
+select nazwa, count(id_pracownika)
+from departament d, pracownik p
+where d.nr_departamentu=p.nr_departamentu
+group by nazwa
+having count(id_pracownika)=(select max(count(id_pracownika)) from pracownik group by nr_departamentu);
+
+////9////
+
+select nazwisko
+from pracownik
+where stanowisko='ANALITYK' and pensja>all(select pensja from pracownik where stanowisko='SPRZEDAWCA');
+
+////10////
+
+select nazwisko, pensja, p.nr_departamentu
+from pracownik p, (select nr_departamentu, max(pensja) zarobki from pracownik group by nr_departamentu) A
+where p.pensja=A.zarobki and A.nr_departamentu=p.nr_departamentu;
+
+////11////
+
+select nazwa
+from pracownik p, departament d
+where d.nr_departamentu=p.nr_departamentu
+group by nazwa
+having count(id_pracownika)>=4;
+
+////12////
+
+select nr_departamentu
+from pracownik
+where premia is not null
+group by nr_departamentu;
+
+////13////
+
+select nr_departamentu, stanowisko, count(id_pracownika)
+from pracownik
+group by nr_departamentu, stanowisko
+order by nr_departamentu;
+
+////14////
+
+select pj.nazwa
+from zlecenie z, projekt pj, pracownik p, pracownik k
+where p.id_pracownika = z.id_pracownika and z.nr_projektu = pj.nr_projektu and
+p.id_pracownika in (select distinct k.id_pracownika from pracownik k, pracownik where p.id_kierownika = k.id_pracownika)
+group by pj.nazwa;
+
+////15////
+
+select nazwa
+from projekt
+where nr_projektu not in 
+    (select nr_projektu from zlecenie where stawka_za_godzine<=35);

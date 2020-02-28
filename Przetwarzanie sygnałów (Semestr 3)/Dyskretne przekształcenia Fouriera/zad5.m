@@ -1,0 +1,32 @@
+N=32
+n=linspace(1,N,N);
+y=sin(2*pi*n/N);
+yfft=2*fft(y)/N;
+ydft=2*myfft(y)/N;
+
+figure;
+stem(y);
+xlabel('Numer probki');
+ylabel('Amplituda');
+title('y');
+figure;
+subplot(2,2,1);
+stem(abs(yfft));
+xlabel('Numer pasma czestotliwosciowego');
+ylabel('Magnituda');
+title('Modul Widma FFT');
+subplot(2,2,2);
+stem(abs(ydft));
+xlabel('Numer pasma czestotliwosciowego');
+ylabel('Magnituda');
+title('Modul Widma - Funkcja Wlasna');
+subplot(2,2,3);
+stem(angle(yfft)/pi);
+xlabel('Numer pasma czestotliwosciowego');
+ylabel('Faza [pi x rad]');
+title('Faza Widma FFT');
+subplot(2,2,4);
+stem(angle(ydft)/pi);
+xlabel('Numer pasma czestotliwosciowego');
+ylabel('Faza [pi x rad]');
+title('Faza Widma - Funkcja Wlasna');

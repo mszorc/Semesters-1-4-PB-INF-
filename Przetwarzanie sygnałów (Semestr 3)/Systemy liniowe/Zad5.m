@@ -1,0 +1,18 @@
+fs=5000;
+[anechoic,fs0] = audioread('anechoic.mp4');
+[impulse,fs1] = audioread('impulse.mp4');
+[impulse2,fs2] = audioread('impulse2.mp4');
+t=0:1/fs0:5-1/fs0;
+y = anechoic(1:5*fs0,1);
+imp1 = impulse(:,1);
+imp2 = impulse2(:,1);
+con1 = conv(y,imp1,'same');
+con2 = conv(y,imp2,'same');
+subplot(1,3,1);
+plot(t,y);
+subplot(1,3,2);
+plot(t,con1);
+subplot(1,3,3);
+plot(t,con2);
+sound(1/10*con1,fs0);
+sound(1/10*con2,fs0);

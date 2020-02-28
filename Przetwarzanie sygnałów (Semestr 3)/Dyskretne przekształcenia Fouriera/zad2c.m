@@ -1,0 +1,33 @@
+N=2^16;
+n=1:1:N;
+y1=cos(2*pi*n/N+pi/4);
+y2=0.5*cos(4*pi*n/N);
+y3=0.25*cos(8*pi*n/N+pi/2);
+y4=y1+y2+y3;
+y1fft=2*fft(y1)/N;
+y2fft=2*fft(y2)/N;
+y3fft=2*fft(y3)/N;
+y4fft=2*fft(y4)/N;
+fz=angle(y4fft)/pi;
+fz(2)
+figure
+subplot(2,2,1);
+stem(angle(y1fft)/pi);
+xlabel('Numer pasma czestotliwosciowego');
+ylabel('Faza [pi x rad]');
+title('y1[n]=cos(2\pin/N+\pi/4)');
+subplot(2,2,2);
+stem(angle(y2fft)/pi);
+xlabel('Numer pasma czestotliwosciowego');
+ylabel('Faza [pi x rad]');
+title('y2[n]=0.5cos(4\pin/N)');
+subplot(2,2,3);
+stem(angle(y3fft)/pi);
+xlabel('Numer pasma czestotliwosciowego');
+ylabel('Faza [pi x rad]');
+title('y3[n]=0.25cos(8\pin/N+\pi/2)');
+subplot(2,2,4);
+stem(angle(y4fft)/pi);
+xlabel('Numer pasma czestotliwosciowego');
+ylabel('Faza [pi x rad]');
+title('y4[n]=y1+y2+y3');

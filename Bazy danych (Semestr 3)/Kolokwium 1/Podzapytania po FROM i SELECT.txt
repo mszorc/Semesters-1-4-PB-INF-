@@ -1,0 +1,11 @@
+////5////
+
+select d.nr_departamentu, (select count(p.id_pracownika) from pracownik p 
+        where p.nr_departamentu=d.nr_departamentu and upper(p.stanowisko) != upper('informatyk')) 
+from departament d
+where (select count(distinct stanowisko) from pracownik) = (select count(distinct stanowisko) 
+                                            from pracownik where nr_departamentu = d.nr_departamentu)
+and (select min(p.data_zatrudnienia) from pracownik p where p.data_zatrudnienia != 
+                        (select min(data_Zatrudnienia) from pracownik)) = any(select p1.data_zatrudnienia 
+                                                    from pracownik p1 where p1.nr_departamentu=d.nr_departamentu)
+group by d.nr_departamentu;

@@ -1,0 +1,79 @@
+select *
+from pracownik;
+
+////1////
+
+SELECT nazwisko, pensja, data_zatrudnienia, nazwa
+FROM pracownik p, departament d
+WHERE nazwisko = '&naz' AND p.nr_departamentu = d.nr_departamentu;
+
+////2////
+
+SELECT nazwisko, pensja, data_zatrudnienia, nazwa
+FROM pracownik p, departament d
+WHERE LOWER(nazwisko) = LOWER('&naz') AND p.nr_departamentu = d.nr_departamentu;
+
+////3////
+
+SELECT p1.nazwisko PRACOWNIK, p2.nazwisko KIEROWNIK, p2.pensja-p1.pensja ROZNICA_PENSJI
+FROM pracownik p1, pracownik p2
+WHERE p1.id_kierownika=p2.id_pracownika;
+
+////4////
+
+SELECT nazwisko, substr(stanowisko,1,1) PIERWSZA_LITERA
+from pracownik
+WHERE stanowisko LIKE 'A%' or stanowisko LIKE 'S%';
+
+////5////
+
+SELECT nazwa
+FROM departament
+WHERE substr(nazwa,13,13) IS NOT NULL;
+
+////6////
+
+SELECT TO_CHAR(sysdate,'DAY DD,MONTH,YYYY - HH:MI:SS')
+FROM dual;
+
+////7////
+
+SELECT nazwisko, TO_CHAR(data_zatrudnienia,'DD'), TO_CHAR(data_zatrudnienia,'MM'), TO_CHAR(data_zatrudnienia,'MONTH')
+FROM pracownik;
+
+////8////
+
+SELECT nazwisko, pensja + greatest(pensja*0.5,NVL(premia,0))*0.2
+FROM pracownik;
+
+////9////
+
+SELECT p1.nazwisko PRACOWNIK, p2.nazwisko KIEROWNIK, d2.lokalizacja
+FROM pracownik p1, pracownik p2, departament d1, departament d2
+WHERE d1.lokalizacja = 'Bialystok' AND p2.nr_departamentu = d2.nr_departamentu AND p1.id_kierownika = p2.id_pracownika 
+AND d1.nr_departamentu = d2.nr_departamentu;
+
+////10////
+
+SELECT p1.nazwisko PRACOWNIK, p2.nazwisko KIEROWNIK
+FROM pracownik p1, pracownik p2
+WHERE p1.id_kierownika = p2.id_pracownika AND p1.pensja>p2.pensja;
+
+////11////
+
+SELECT p1.nazwisko PRACOWNIK
+FROM pracownik p1, pracownik p2
+WHERE p1.id_kierownika = p2.id_pracownika AND p1.nr_departamentu = p2.nr_departamentu; 
+
+////12////
+
+select p.nazwisko
+from pracownik p, zlecenie z1, pracownik k, zlecenie z2
+where p.id_pracownika=z1.id_pracownika and p.id_kierownika=k.id_pracownika and k.id_pracownika=z2.id_pracownika
+and z1.nr_projektu=z2.nr_projektu;
+
+////13////
+
+SELECT nazwisko PRACOWNIK, nr_przedzialu, decode(nr_przedzialu,1,pensja*1.2,2,pensja*1.15,pensja*1.1)
+FROM pracownik, poziom_zarobkow
+WHERE pensja>=dolna_granica AND pensja<=gorna_granica;

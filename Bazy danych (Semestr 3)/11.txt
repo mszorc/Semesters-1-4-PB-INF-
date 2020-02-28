@@ -1,0 +1,71 @@
+////1 i 2////
+
+CREATE TABLE STUDENCI 
+(indeks number(10) constraint kl_glowny_student primary key,
+nazwisko varchar2(15) not null check(nazwisko=initcap((nazwisko))),
+imie varchar2(15) not null check (imie=initcap(imie)), 
+wydzial number(2) constraint kl_obcy_wydzial references wydzialy(id_wydzialu) ON DELETE CASCADE,
+srednia_ocen number(3,2) check(srednia_ocen between 2 and 5),
+plec varchar2(1) check (plec in ('k','m')),
+data_urodzenia date,
+rok_studiow number(1) default 1 check(rok_studiow in (1,2,3,4,5)));
+
+create table wydzialy
+(id_wydzialu number(2) constraint kl_glowny_wydzial primary key,
+nazwa varchar2(15),
+adres varchar2(30));
+
+create table stypendia
+(grupa_zaszeregowania number(1) constraint kl_glowny_stypendia primary key,
+dolny_prog_sredniej number(3,2), 
+gorny_prog_sredniej number(3,2),
+kwota number(4),
+check(dolny_prog_sredniej<gorny_prog_sredniej));
+
+////3////
+
+insert into wydzialy values(1,'Wydzial1','Wiejska 16');
+insert into studenci values(1,'Kowalski','Jan',1,2.5,'m',to_date('16/12/1998','DD/MM/YYYY'),1);
+
+////4////
+
+alter table studenci
+add data_urodzenia constraint ewqe1 check(data_urodzenia<to_date('21/12/2018','DD/MM/YYYY'));
+
+////5////
+
+alter table studenci drop constraint ewqe1;
+
+////6////
+
+create table akademiki(
+id_akademika number(2) primary key,
+nazwa varchar2(20) not null,
+ulica varchar2(20),
+numer varchar2(10),
+miejscowowsc varchar2(20),
+kod varchar2(6) constraint check_akademiki_kod check (kod like '__-___')
+);
+
+create table pokoje(
+id_pokoju number(2) primary key,
+nr_pokoju number(3) not null,
+id_akademika references akademiki(id_akademika) on delete cascade);
+
+alter table studenci
+add id_akademika number(2) references akademiki(id_akademika) on delete cascade;
+
+alter table studenci
+add nr_pokoju number(4);
+
+alter table studenci
+add constraint fk_studenci_pokoje foreign key (nr_pokoju, id_akademika)
+references pokoje on delete cascade;
+
+////7////
+
+
+
+////17////
+
+drop table pokoje;

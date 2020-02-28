@@ -1,0 +1,77 @@
+////1////
+
+select * from pracownik;
+select * from departament;
+select * from poziom_zarobkow;
+
+////2////
+
+select nazwisko, pensja
+from pracownik
+order by data_zatrudnienia desc;
+
+////3////
+
+select nazwisko, (pensja+nvl(premia,0)) as "Zarobki"
+from pracownik;
+
+////4////
+
+select nazwisko, nr_przedzialu
+from pracownik, poziom_zarobkow
+where pensja>=dolna_granica and pensja<=gorna_granica;
+
+////5////
+
+select nazwisko, nazwa
+from pracownik p, departament d
+where p.nr_departamentu=d.nr_departamentu and (upper(lokalizacja)=upper('Gdansk') or lokalizacja='Olsztyn');
+
+////6////
+
+select nazwisko
+from pracownik 
+where id_kierownika is null;
+
+////7////
+
+select nazwisko
+from pracownik
+where stanowisko like 'S%';
+
+////8////
+
+select nazwisko, premia
+from pracownik
+where (nazwisko like 'J%' or nazwisko like 'M%') and premia is null;
+
+////9////
+
+select nazwisko, pensja
+from pracownik, poziom_zarobkow
+where (pensja>=dolna_granica and pensja<=gorna_granica) and (nr_przedzialu=1 or nr_przedzialu=2);
+
+////10////
+
+select nazwisko, nazwa
+from pracownik p, zlecenie z, projekt pj
+where p.id_pracownika=z.id_pracownika and pj.nr_projektu=z.nr_projektu;
+
+////11////
+
+select distinct d.nazwa, pj.nazwa
+from departament d, pracownik p, zlecenie z, projekt pj
+where d.nr_departamentu=p.nr_departamentu and p.id_pracownika=z.id_pracownika
+and z.nr_projektu=pj.nr_projektu;
+
+////12////
+
+select distinct stanowisko, nr_departamentu
+from pracownik;
+
+////13////
+
+select nazwisko, nazwa, stanowisko
+from pracownik p, departament d
+where d.nr_departamentu=p.nr_departamentu and 
+nazwa='Departament 2' and upper(stanowisko)=upper('Analityk');

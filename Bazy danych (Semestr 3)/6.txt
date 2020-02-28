@@ -1,0 +1,97 @@
+select *
+from pracownik;
+
+/////1////
+select id_pracownika
+from pracownik
+where stanowisko = 'INFORMATYK' and pensja>any(select pensja from pracownik where stanowisko = 'KSIEGOWY');
+
+////2////
+select distinct stanowisko
+from pracownik p, departament d
+where d.nr_departamentu=p.nr_departamentu and stanowisko not in (select stanowisko
+from pracownik p1, departament d1 where d1.nr_departamentu=p1.nr_departamentu and nazwa='Departament 1');
+
+///3///
+select stanowisko, avg(pensja)
+from pracownik p
+where stanowisko in (select stanowisko
+              from pracownik p1, departament d1 where d1.nr_departamentu=p1.nr_departamentu and nazwa='Departament 1')
+group by stanowisko
+having avg(pensja)>(select avg(pensja) from pracownik);
+
+////4/////
+select id_pracownika
+from pracownik
+where id_pracownika not in (select k.id_pracownika from pracownik k, pracownik p where p.id_kierownika=k.id_pracownika);
+
+////5////
+select id_pracownika, nazwisko, pensja+nvl(premia,0)
+from pracownik
+where pensja+nvl(premia,0)=(
+select max(pensja+nvl(premia,0))
+from pracownik
+where id_pracownika not in (select k.id_pracownika from pracownik k, pracownik p where p.id_kierownika=k.id_pracownika)) and
+id_pracownika not in (select k.id_pracownika from pracownik k, pracownik p where p.id_kierownika=k.id_pracownika);
+
+////6/////
+select nazwisko, stanowisko, pensja
+from pracownik
+where pensja>all(select pensja from pracownik where stanowisko='PRZEDSTAWICIEL');
+
+////7/////
+select nazwisko
+from pracownik
+where length(nazwisko) = (select max(length(nazwisko)) from pracownik);
+
+////8////
+select nazwa, count(id_pracownika) ilosc
+from departament d, pracownik p
+where p.nr_departamentu=d.nr_departamentu
+group by nazwa
+having count(id_pracownika) >=all(select count(id_pracownika) from pracownik group by nr_departamentu);
+
+////9////
+select nazwisko
+from pracownik
+where stanowisko='ANALITYK' and pensja>all(select pensja from pracownik where stanowisko='SPRZEDAWCA');
+
+////10////
+select nazwisko, pensja, d.nr_departamentu
+from pracownik p,departament d
+where pensja in (select max(pensja)from pracownik group by nr_departamentu)
+and d.nr_departamentu=p.nr_departamentu;
+//tutaj trzeba cos dodac, nie wyswietla departamentu nr 5
+
+////11///
+select nazwa, count(id_pracownika)
+from departament d, pracownik p
+where d.nr_departamentu=p.nr_departamentu
+group by nazwa
+having count(id_pracownika) >=4;
+
+////12////
+select nazwa
+from departament d, pracownik p
+where premia is not null and d.nr_departamentu = p.nr_departamentu;
+
+////13///
+select nr_departamentu, stanowisko, count(id_pracownika)
+from pracownik
+group by nr_departamentu, stanowisko;
+
+///14///
+select pj.nazwa
+from zlecenie z, projekt pj, pracownik p, pracownik k
+where p.id_pracownika = z.id_pracownika and z.nr_projektu = pj.nr_projektu and
+p.id_pracownika in (select distinct k.id_pracownika from pracownik k, pracownik where p.id_kierownika = k.id_pracownika)
+group by pj.nazwa;
+
+///15////
+select nazwa
+from projekt 
+where nazwa not in (select nazwa from projekt p, zlecenie z where z.nr_projektu=p.nr_projektu and stawka_za_godzine<35) 
+group by nazwa;
+
+select *
+from zlecenie;

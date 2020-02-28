@@ -1,0 +1,104 @@
+////1////
+
+create or replace view p_ms1 (nr_projektu, wydane_pieniadze)
+as select nr_projektu, sum(ilosc_godzin*stawka_za_godzine)
+from zlecenie
+group by nr_projektu;
+
+select nazwa
+from projekt pr, p_ms1
+where p_ms1.wydane_pieniadze>budzet and p_ms1.nr_projektu=pr.nr_projektu;
+
+drop view p_ms1;
+
+////2////
+
+create or replace view p_ms2 (nr_departamentu, stanowisko, liczba_osob)
+as select nr_departamentu, stanowisko, count(*)
+from pracownik
+group by nr_departamentu, stanowisko;
+
+select nazwa, stanowisko, liczba_osob
+from departament d, p_ms2
+where d.nr_departamentu=p_ms2.nr_departamentu and liczba_osob=(select max(liczba_osob) from p_ms2 where d.nr_departamentu=p_ms2.nr_departamentu);
+
+drop view p_ms2;
+
+////3////
+
+create or replace view p_ms3 (stanowisko, liczba_osob)
+as select stanowisko, count(*)
+from pracownik p, zlecenie z, projekt pr
+where p.id_pracownika=z.id_pracownika and pr.nr_projektu=z.nr_projektu and to_char(pr.data_rozpoczecia,'YYYY')='1982'
+group by stanowisko;
+
+select stanowisko, liczba_osob
+from p_ms3 
+where liczba_osob=(select max(liczba_osob) from p_ms3);
+
+drop view p_ms3;
+
+////4////
+
+create or replace view p_ms4 (nr_departamentu, srednia_pensja)
+as select nr_departamentu, avg(pensja)
+from pracownik
+where nr_departamentu= (select nr_departamentu from pracownik where nazwisko='Nazwisko3')
+group by nr_departamentu;
+
+select nazwisko, pensja
+from pracownik p, p_ms4
+where p.nr_departamentu=p_ms4.nr_departamentu and pensja<p_ms4.srednia_pensja;
+
+drop view p_ms4;
+
+////5////
+
+create or replace view p_ms5 (nr_departamentu, srednia_pensja)
+as select nr_departamentu, avg(pensja)
+from pracownik
+group by nr_departamentu;
+
+select p_ms5.nr_departamentu, nazwisko
+from p_ms5, pracownik p
+where p.pensja<srednia_pensja and p.nr_departamentu=p_ms5.nr_departamentu; 
+
+drop view p_ms5;
+
+////6////
+
+select k.nazwisko kierownik, count(*)
+from pracownik p, pracownik k
+where p.id_kierownika=k.id_pracownika
+group by k.nazwisko, k.id_pracownika;
+ 
+select * from pracownik;
+
+
+////7////
+
+create or replace view p_ms71 (nr_projektu, stanowisko, ilosc_pracownikow)
+as select nr_projektu, stanowisko, count(z.id_pracownika)
+from  zlecenie z, pracownik p
+where z.id_pracownika=p.id_pracownika
+group by nr_projektu, stanowisko;
+
+create or replace view p_ms72 (nr_projektu, ilosc_pracownikow)
+as select nr_projektu, count(id_pracownika)
+from  zlecenie
+group by nr_projektu;
+
+select p_ms71.nr_projektu, p_ms71.stanowisko, round(p_ms71.ilosc_pracownikow/p_ms72.ilosc_pracownikow*100,2)
+from p_ms71, p_ms72
+where p_ms71.nr_projektu=p_ms72.nr_projektu;
+
+select * from p_ms71;
+
+////8////
+
+create or replace view p_ms8 (srednia_pensja)
+as select avg(pensja)
+from pracownik;
+
+select id_pracownika, round(pensja-srednia_pensja,2)
+from pracownik, p_ms8;

@@ -1,0 +1,97 @@
+function [stft, f, t] = spektrogram( x, N, fs ) % N liczba punktów FFT
+if size(x, 2) > 1
+x = x';
+end
+x = x/max(abs(x));
+win= hann(256, 'periodic');
+row = 0;
+column = 1;
+stft = zeros(ceil((1+N)/2), 1+fix((length(x)256)/16));
+% STFT
+while row + 256 <= length(x)
+xw = x(row+1:row+256).*win;
+X = fft(xw, N);
+stft(:, column) = X(1:ceil((1+N)/2));
+row = row + 16;
+column = column + 1;
+end
+S = sum(hamming(256, 'periodic'))/256;
+f = (0:ceil((1+N)/2)1)*fs/N;
+t = (256/2:16:256/2+(1+fix((length(x)256)/16)1)*16)/fs;
+stft = abs(stft)/256/S;
+if rem(N, 2)
+stft(2:end, :) = stft(2:end, :).*2;
+else
+stft(2:end1, :) = stft(2:end1, :).*2;
+end
+stft = 20*log10(stft + 1e6);
+end
+
+
+
+
+
+
+Szum Gaussa:
+time=5;
+fs=8000;
+y=randn(1, time*fs);
+[sp, f, t] =spektrogram(y, 2048, fs);
+mesh(t, f, sp);
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+col = colorbar;
+ylabel(col, 'Power (dB)');
+title('Spektrogram Szumu Gaussa');
+
+
+
+Sinusoida o sta³ej czêstotliwoœci:
+time=5;
+fs=8000;
+t = [0:1/fs:time1/fs];
+f=1000;
+y=sin(2*pi*f*t);
+[sp, f, t] = spektrogram(y, 2048, fs);
+mesh(t, f, sp);
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+col = colorbar;
+ylabel(col, 'Power (dB)');
+title('Spektrogram Sygna³u Sinusoidalnego');
+
+
+
+
+
+Sygna³ o zmiennej czêstotliwoœci:
+time=5;
+fs=8000;
+t=[0:1/fs:time1/fs];
+y=chirp(t, 0, 5, 1000, 'quadratic');
+[s, f, t] = spektrogram(y, 2048, fs);
+mesh(t, f, s);
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+col = colorbar;
+ylabel(col, 'Power (dB)');
+title('Spektrogram Sygna³u o Zmiennej Czêstotliwoœci');
+
+
+
+
+
+
+Sygna³ mowy:
+time=5;
+fs=8000;
+t=[0:1/fs:time1/fs];
+speech=audioread(sound.wav');
+speech=speech(1:40000);
+[s, f, t] = spektrogram(speech, 2048, fs);
+mesh(t, f, s);
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+col = colorbar;
+ylabel(col, 'Power (dB)');
+title('Spektrogram Sygna³u Mowy');

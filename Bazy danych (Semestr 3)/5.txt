@@ -1,0 +1,60 @@
+select *
+from pracownik;
+
+/1
+select nazwa, count(id_pracownika)
+from departament d, pracownik p
+where d.nr_departamentu=p.NR_DEPARTAMENTU(+)
+group by nazwa, d.nr_departamentu
+order by nazwa;
+
+/2
+select p.nazwisko nazwisko, k.id_pracownika id_kierownika, k.nazwisko nazwisko_kierownika
+from pracownik p, pracownik k
+where p.id_kierownika = k.id_pracownika(+)
+order by nazwisko_kierownika, nazwisko desc;
+
+/3
+select nazwa, SUM(ilosc_godzin*STAWKA_ZA_GODZINE)
+from projekt p, zlecenie z
+where z.nr_projektu(+)=p.nr_projektu
+group by nazwa
+order by nazwa;
+
+/4
+select nazwisko, nvl(SUM(ilosc_godzin*stawka_za_godzine),0)
+from pracownik p, zlecenie z
+where p.id_pracownika=z.id_pracownika(+)
+group by nazwisko;
+
+/5
+select nazwisko
+from pracownik p1
+where stanowisko in (select stanowisko from pracownik p2 where nazwisko='Nazwisko3');
+
+/6
+select nazwisko, pensja
+from pracownik
+where pensja>any(select pensja from pracownik where nazwisko = 'Nazwisko4') and pensja<any(select pensja from pracownik where nazwisko = 'Nazwisko7');
+
+/7
+select nazwisko, data_zatrudnienia
+from pracownik
+where data_zatrudnienia = (select min(data_zatrudnienia) from pracownik);
+
+/8
+select nazwisko, data_zatrudnienia
+from pracownik
+where data_zatrudnienia>(select data_zatrudnienia from pracownik where nazwisko='Nazwisko3');
+
+/9
+select nazwisko
+from pracownik
+where nr_departamentu in (select nr_departamentu from pracownik where nazwisko='Nazwisko3') and pensja<(select avg(pensja) from pracownik);
+
+/10
+select d.nr_departamentu from departament d, pracownik p
+where p.nr_departamentu(+)=d.nr_Departamentu
+group by d.nr_departamentu
+having count(p.id_pracownika)=(select min(count(prac.id_pracownika)) from pracownik prac, departament dep 
+where prac.nr_departamentu(+)=dep.nr_Departamentu group by dep.nr_Departamentu);

@@ -1,0 +1,83 @@
+select * from pracownik;
+select * from poziom_zarobkow;
+select * from zlecenie;
+select * from projekt;
+
+
+////1////
+
+select nr_departamentu, sum(pensja)
+from pracownik p
+where nr_departamentu in (select distinct nr_departamentu from pracownik
+                    where pensja>=(select max(dolna_granica) from poziom_zarobkow) and pensja<=(select max(gorna_granica) from poziom_zarobkow)
+                    and id_pracownika not in (select distinct k.id_pracownika from pracownik p, pracownik k where p.id_kierownika=k.id_pracownika))
+group by nr_departamentu;
+
+////2////dokonczyc trzeba
+
+select stanowisko, nazwa
+from departament d, pracownik p
+where d.nr_departamentu=p.nr_departamentu and p.nr_departamentu in
+        (select nr_departamentu from pracownik p1 where p.stanowisko=p1.stanowisko and premia is null 
+            group by nr_departamentu having count(*)=(select max(p2.id_pracownika) from pracownik p2 where p1.stanowisko=p2.stanowisko and premia is null));
+
+////3////
+
+select  distinct A.stanowisko
+from pracownik, (select stanowisko, count(*) ilosc_osob from pracownik
+                where pensja>=(select min(dolna_granica) from poziom_zarobkow)
+                and pensja<=(select min(gorna_granica) from poziom_zarobkow)
+                and id_pracownika not in(select id_pracownika from zlecenie) group by stanowisko) A
+where ilosc_osob = 1;
+
+////4////
+
+select nazwisko, stanowisko
+from pracownik p
+where exists (select 1 from pracownik p1 where p.stanowisko=p1.stanowisko
+                and p.id_kierownika!=p1.id_pracownika and p.nr_departamentu=p1.nr_departamentu
+                and p.id_pracownika!=p1.id_pracownika);
+                
+////5////dokonczyc trzeba
+
+select nazwa, count(z.id_pracownika)
+from projekt pj, zlecenie z
+where z.nr_projektu=pj.nr_projektu and z.nr_projektu not in (select nr_projektu from pracownik p1, zlecenie z1 where 
+                                p1.id_pracownika!=z1.id_pracownika and )
+group by nazwa;
+
+////6////
+
+select nazwa
+from departament d
+where d.nr_departamentu in (select nr_departamentu from pracownik where id_pracownika not in(select id_pracownika from zlecenie)
+                    group by nr_departamentu having count(distinct stanowisko)>=2);
+                    
+////7////
+
+select nazwisko
+from pracownik p, poziom_zarobkow
+where pensja>=dolna_granica and pensja<=gorna_granica and dolna_granica!=
+                    (select dolna_granica from poziom_zarobkow, pracownik p1 where p.id_kierownika=p1.id_pracownika
+                    and p1.pensja>=dolna_granica and p1.pensja<=gorna_granica and p.stanowisko=p1.stanowisko)
+and premia is null;
+
+////8////chyba zle
+
+select stanowisko
+from pracownik p
+where (select count(distinct nr_przedzialu) from poziom_zarobkow where p.pensja>=(dolna_granica) and p.pensja<=(gorna_granica) group by stanowisko)>=3
+group by stanowisko;
+
+
+////10////
+
+select k.id_pracownika
+from pracownik p, pracownik k
+where p.id_kierownika=k.id_pracownika and 
+                    k.id_pracownika in (select id_pracownika from zlecenie z1 where k.id_pracownika=z1.id_pracownika
+                    group by id_pracownika having count(*)=(select max(count(z2.id_pracownika)) from zlecenie z2, pracownik p2
+                    where z2.id_pracownika = p2.id_kierownika group by p2.id_pracownika));
+                    
+                
+

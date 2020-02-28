@@ -1,0 +1,100 @@
+select * from pracownik;
+select * from zlecenie;
+select * from projekt;
+
+////1////
+
+select nazwisko
+from pracownik p
+where pensja=(select pensja from pracownik where pracownik.pensja=p.pensja 
+                            and pracownik.id_pracownika!=p.id_pracownika);
+                            
+////2////
+
+select nazwisko, pensja
+from pracownik p 
+where not exists (select 1 from pracownik p1 where p.id_pracownika=p1.id_kierownika);
+
+////3////
+
+select nazwisko
+from pracownik p, zlecenie z
+where p.id_pracownika=z.id_pracownika
+group by nazwisko
+having count(z.id_pracownika)=2;
+
+////4////
+
+select nr_przedzialu 
+from pracownik p, poziom_zarobkow pz
+where pensja between dolna_granica and gorna_granica
+and exists (select 1 from pracownik p1, zlecenie z1 where p1.id_pracownika=z1.id_pracownika and p1.pensja between pz.dolna_granica and pz.gorna_granica group by p1.id_pracownika having count(*)=2)
+group by nr_przedzialu
+having count(*)>=2;
+
+////5////
+
+select nr_projektu
+from zlecenie z, pracownik p
+where z.id_pracownika=p.id_pracownika
+group by nr_projektu
+having count(distinct stanowisko)=count(stanowisko);
+
+////6////
+
+select nazwa, nazwisko
+from projekt pr, zlecenie z, pracownik p
+where pr.nr_projektu=z.nr_projektu and z.id_pracownika=p.id_pracownika and z.nr_projektu=any
+(select z.nr_projektu
+from zlecenie z, pracownik p
+where z.id_pracownika=p.id_pracownika 
+group by nr_projektu
+having count(distinct stanowisko)=count(stanowisko));
+
+////7////
+
+select distinct nr_departamentu
+from pracownik p
+where p.id_pracownika in (select id_pracownika from zlecenie group by id_pracownika having count(*)=2);
+
+////8////
+
+select nazwa, nazwisko
+from departament d, pracownik p
+where d.nr_departamentu=p.nr_departamentu
+        and d.nr_departamentu in (select nr_departamentu from pracownik group by nr_departamentu
+        having count(id_pracownika)>=all(select count(id_pracownika) from pracownik group by nr_departamentu))
+and exists (select 1 from zlecenie z1 where p.id_pracownika=z1.id_pracownika)
+group by nazwa, nazwisko;
+
+////9////
+
+select nazwa, min(pensja), round(avg(pensja),2), max(pensja)
+from departament d, pracownik p
+where d.nr_departamentu=p.nr_departamentu and stanowisko='SPRZEDAWCA'
+group by nazwa
+having count(id_pracownika)=(select max(count(id_pracownika)) from pracownik where stanowisko='SPRZEDAWCA' group by nr_departamentu);
+
+////10////niepe³ne
+
+select p.nazwisko, k.nazwisko
+from pracownik p, pracownik k
+where p.id_kierownika=k.id_pracownika(+)
+    and p.id_pracownika in (select id_pracownika from zlecenie z1, projekt pj1 
+                where pj1.data_rozpoczecia=(select min(data_rozpoczecia) from projekt) 
+                and pj1.nr_projektu=z1.nr_projektu);
+                
+////11////
+
+select nazwa
+from departament d, pracownik p 
+where d.nr_departamentu in (select nr_departamentu from pracownik group by nr_departamentu
+        having count(id_pracownika)>=all(select count(id_pracownika) from pracownik group by nr_departamentu)) and
+        p.id_pracownika in (select max(pensja) from pracownik) and d.nr_departamentu=p.nr_departamentu;
+        
+////12////
+
+select nazwisko
+from pracownik 
+where pensja>(select min(k.pensja) from pracownik p, pracownik k where p.id_kierownika=k.id_pracownika)
+order by id_pracownika;
